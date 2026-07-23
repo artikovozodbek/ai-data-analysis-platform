@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Dataset</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; background: #eef4fb; }
+        label, input, button { display: block; margin: 10px 0; width: 100%; max-width: 480px; }
+        button { width: auto; padding: 8px 16px; background: #1e4a7d; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+        button:hover { opacity: 0.9; }
+        .row { display: flex; gap: 12px; align-items: center; max-width: 480px; }
+        .row input { flex: 1; }
+        #report { white-space: pre-wrap; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid #ddd; margin-top: 16px; max-width: 640px; }
+        #new-id { font-weight: bold; color: #1e4a7d; }
+        a { color: #1e4a7d; }
+    </style>
+</head>
+<body>
+    <h1>Edit Dataset</h1>
+    <p>Modify a dataset's columns. The original file is kept; every edit produces a new dataset version with its own ID.</p>
+
+    <label for="dataset-id">Dataset ID</label>
+    <input type="text" id="dataset-id" required />
+
+    <button id="drop-last-btn" type="button">Drop Last Column</button>
+
+    <div class="row">
+        <input type="text" id="column-name" placeholder="Column name to drop" />
+        <button id="drop-column-btn" type="button" style="width:auto;">Drop Column</button>
+    </div>
+
+    <div id="report"></div>
+    <p><a href="index.html">Back to dashboard</a></p>
+    <script>
+        const datasetIdInput = document.getElementById('dataset-id');
+        const report = document.getElementById('report');
+
+        async function performDrop(url) {
+            const datasetId = datasetIdInput.value.trim();
+            if (!datasetId) {
+                report.textContent = 'Please enter a dataset ID.';
+                return;
+            }
+            report.textContent = 'Working...';
+            try {
+                const response = await fetch(url, { method: 'POST' });
+                const data = await response.json();
+                if (!response.ok) {
+                    report.textContent = data.detail || 'Operation failed.';
+                    return;
+                }
+                report.innerHTML =
+                    `<div>${data.report}</div>` +
+                    `<div style="margin-top:10px;">New dataset ID: <span id="new-id">${data.dataset_id}</span></div>` +
+                    `<div>Filename: ${data.filename}</div>`;
+                datasetIdInput.value = data.dataset_id;
+            } catch (error) {
+                report.textContent = 'Request failed: ' + error.message;
+            }
+        }
+
+        document.getElementById('drop-last-btn').addEventListener('click', () => {
+            const datasetId = datasetIdInput.value.trim();
+            performDrop(`/api/datasets/${datasetId}/columns/drop-last`);
+        });
+
+        document.getElementById('drop-column-btn').addEventListener('click', () => {
+            const datasetId = datasetIdInput.value.trim();
+            const column = document.getElementById('column-name').value.trim();
+            if (!column) {
+                report.textContent = 'Please enter a column name to drop.';
+                return;
+            }
+            performDrop(`/api/datasets/${datasetId}/columns/${encodeURIComponent(column)}/drop`);
+        });
+    </script>
+</body>
+</html>

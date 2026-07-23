@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Runtime artifacts
+.env
+uploads/*
+!uploads/.gitkeep
+logs/*
+!logs/.gitkeep
+database/*.db
+reports/generated/

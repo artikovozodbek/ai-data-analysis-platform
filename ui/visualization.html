@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visualizations</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; background: #f3f7fb; }
+        label, button { display: block; margin: 12px 0; }
+        textarea { width: 100%; min-height: 140px; }
+        a { color: #1e4a7d; }
+        #status { color: #b3261e; font-weight: 600; }
+        #chart { width: 100%; min-height: 480px; margin-top: 16px; background: #fff; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Visualization Recommendations</h1>
+    <p>Enter a dataset ID and request a chart. The supported types are histogram, scatter, box, line, pie, bar, heatmap, missing, and feature_importance.</p>
+    <form id="visualize-form">
+        <label for="dataset-id">Dataset ID</label>
+        <input type="text" id="dataset-id" name="dataset_id" required />
+        <label for="chart-type">Chart Type</label>
+        <input type="text" id="chart-type" name="chart_type" value="histogram" />
+        <label for="x">X Column</label>
+        <input type="text" id="x" name="x" />
+        <label for="y">Y Column</label>
+        <input type="text" id="y" name="y" />
+        <label for="color">Color Column</label>
+        <input type="text" id="color" name="color" />
+        <button type="submit">Fetch Visualization</button>
+    </form>
+    <p id="status"></p>
+    <div id="chart"></div>
+    <p><a href="index.html">Back to dashboard</a></p>
+    <script>
+        const form = document.getElementById('visualize-form');
+        const status = document.getElementById('status');
+        const chart = document.getElementById('chart');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const datasetId = document.getElementById('dataset-id').value.trim();
+            const chartType = document.getElementById('chart-type').value.trim();
+            const x = document.getElementById('x').value.trim();
+            const y = document.getElementById('y').value.trim();
+            const color = document.getElementById('color').value.trim();
+
+            status.textContent = '';
+            Plotly.purge(chart);
+
+            if (!datasetId || !chartType) {
+                status.textContent = 'Please provide a dataset ID and chart type.';
+                return;
+            }
+            const query = new URLSearchParams({ chart_type: chartType });
+            if (x) query.append('x', x);
+            if (y) query.append('y', y);
+            if (color) query.append('color', color);
+            try {
+                const response = await fetch(`/api/datasets/${datasetId}/visualization?${query.toString()}`);
+                const data = await response.json();
+                if (!response.ok) {
+                    status.textContent = data.detail || 'Visualization failed.';
+                    return;
+                }
+                Plotly.newPlot(chart, data.figure.data, data.figure.layout, { responsive: true });
+            } catch (error) {
+                status.textContent = 'Request failed: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

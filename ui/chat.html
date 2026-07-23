@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chat</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; background: #eef4fb; }
+        label, button, textarea { display: block; margin: 12px 0; width: 100%; }
+        textarea { min-height: 120px; }
+        #answer { white-space: pre-wrap; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid #ddd; }
+        #version-note { margin-top: 8px; color: #1e7d4a; font-size: 14px; }
+        #chart { width: 100%; min-height: 480px; margin-top: 16px; background: #fff; border-radius: 8px; }
+        a { color: #1e4a7d; }
+    </style>
+</head>
+<body>
+    <h1>AI Chat with Dataset</h1>
+    <p>Ask a natural language question, ask for a chart, or ask to edit the dataset — e.g. "show me a scatter chart of Attack and Defense", "grafik chiz: Type 1", or "delete the last column".</p>
+    <form id="chat-form">
+        <label for="dataset-id">Dataset ID</label>
+        <input type="text" id="dataset-id" name="dataset_id" required />
+        <label for="question">Question</label>
+        <textarea id="question" name="question" required>What can you tell me about this dataset?</textarea>
+        <button type="submit">Ask</button>
+    </form>
+    <div id="answer"></div>
+    <div id="version-note"></div>
+    <div id="chart"></div>
+    <p><a href="index.html">Back to dashboard</a></p>
+    <script>
+        const form = document.getElementById('chat-form');
+        const datasetIdInput = document.getElementById('dataset-id');
+        const answer = document.getElementById('answer');
+        const versionNote = document.getElementById('version-note');
+        const chart = document.getElementById('chart');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const datasetId = datasetIdInput.value.trim();
+            const question = document.getElementById('question').value.trim();
+            answer.textContent = '';
+            versionNote.textContent = '';
+            Plotly.purge(chart);
+            if (!datasetId || !question) {
+                answer.textContent = 'Please enter a dataset ID and question.';
+                return;
+            }
+            try {
+                const params = new URLSearchParams({ dataset_id: datasetId, question });
+                const response = await fetch(`/api/chat?${params.toString()}`, { method: 'POST' });
+                const data = await response.json();
+                if (!response.ok) {
+                    answer.textContent = data.detail || 'Chat request failed.';
+                    return;
+                }
+                answer.textContent = data.answer;
+                if (data.figure) {
+                    Plotly.newPlot(chart, data.figure.data, data.figure.layout, { responsive: true });
+                }
+                if (data.dataset_id) {
+                    versionNote.innerHTML = `New dataset version created: <strong>${data.dataset_id}</strong> (${data.filename}). Using it for the next question.`;
+                    datasetIdInput.value = data.dataset_id;
+                }
+            } catch (error) {
+                answer.textContent = 'Request failed: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

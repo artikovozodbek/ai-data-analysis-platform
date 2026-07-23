@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; background: #eef2f8; }
+        pre { background: #fff; padding: 16px; border-radius: 8px; border: 1px solid #ddd; }
+        a { color: #1e4a7d; }
+    </style>
+</head>
+<body>
+    <h1>Platform Settings</h1>
+    <p>Current runtime configuration values.</p>
+    <pre id="settings"></pre>
+    <p><a href="index.html">Back to dashboard</a></p>
+    <script>
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/settings');
+                const data = await response.json();
+                if (!response.ok) {
+                    document.getElementById('settings').textContent = data.detail || 'Unable to load settings.';
+                    return;
+                }
+                document.getElementById('settings').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('settings').textContent = 'Failed to load settings: ' + error.message;
+            }
+        }
+        loadSettings();
+    </script>
+</body>
+</html>

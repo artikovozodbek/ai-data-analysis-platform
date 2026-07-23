@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dataset Preview</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; background: #f7f9fc; }
+        label, button { display: block; margin: 12px 0; }
+        #preview { margin-top: 18px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #1e4a7d; color: #fff; }
+        a { color: #1e4a7d; }
+    </style>
+</head>
+<body>
+    <h1>Dataset Preview</h1>
+    <p>Enter a dataset ID to preview the first rows.</p>
+    <form id="preview-form">
+        <label for="dataset-id">Dataset ID</label>
+        <input type="text" id="dataset-id" name="dataset_id" required />
+        <button type="submit">Preview</button>
+    </form>
+    <div id="preview"></div>
+    <p><a href="index.html">Back to dashboard</a></p>
+    <script>
+        const form = document.getElementById('preview-form');
+        const preview = document.getElementById('preview');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const datasetId = document.getElementById('dataset-id').value.trim();
+            if (!datasetId) {
+                preview.textContent = 'Please enter a dataset ID.';
+                return;
+            }
+            try {
+                const result = await fetch(`/api/datasets/${datasetId}/preview`);
+                const data = await result.json();
+                if (!result.ok) {
+                    preview.textContent = data.detail || 'Failed to load preview.';
+                    return;
+                }
+                const rows = data.preview;
+                if (!rows.length) {
+                    preview.textContent = 'Dataset contains no rows.';
+                    return;
+                }
+                const headers = Object.keys(rows[0]);
+                preview.innerHTML = `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+            } catch (error) {
+                preview.textContent = 'Preview failed: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

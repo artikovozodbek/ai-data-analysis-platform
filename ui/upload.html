@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Dataset</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; background: #f0f4fb; }
+        label, button { display: block; margin: 12px 0; }
+        input[type=file] { padding: 8px; }
+        #response { margin-top: 18px; padding: 12px; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        a { color: #1e4a7d; }
+    </style>
+</head>
+<body>
+    <h1>Upload Dataset</h1>
+    <p>Select a supported dataset file and upload it to begin analysis.</p>
+    <form id="upload-form">
+        <label for="dataset">Choose dataset</label>
+        <input type="file" id="dataset" name="dataset" accept=".csv,.xlsx,.xls,.json,.txt,.tsv,.parquet" required />
+        <button type="submit">Upload</button>
+    </form>
+    <div id="response"></div>
+    <p><a href="index.html">Back to dashboard</a></p>
+    <script>
+        const form = document.getElementById('upload-form');
+        const response = document.getElementById('response');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const fileInput = document.getElementById('dataset');
+            if (!fileInput.files.length) {
+                response.textContent = 'Please choose a file to upload.';
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            try {
+                const result = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await result.json();
+                if (!result.ok) {
+                    response.textContent = data.detail || 'Upload failed.';
+                    return;
+                }
+                response.innerHTML = `<strong>Upload successful.</strong><br>Dataset ID: ${data.dataset_id}`;
+            } catch (error) {
+                response.textContent = 'Upload failed: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
