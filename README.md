@@ -1,6 +1,16 @@
-# AI Data Analysis Platform
+# 📊 AI Data Analysis Platform
 
 AI Data Analysis Platform is a modular data analysis system built with Python and FastAPI. It provides dataset uploading, dataset understanding, AI chat, data cleaning guidance, statistical analysis, visualization recommendations, report generation, and a simple UI.
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Multi-Agent](https://img.shields.io/badge/Multi--Agent-Orchestration-8250df?style=for-the-badge)
+![Plotly](https://img.shields.io/badge/Plotly-Visualizations-3f4f75?style=for-the-badge&logo=plotly&logoColor=white)
+![Tested](https://img.shields.io/badge/pytest-Tested-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
+
+[Demo](#-demo) · [Features](#features) · [Installation](#installation) · [Running](#running-the-application) · [Project Structure](#project-structure)
+
+## 📽 Demo
 
 ![Demo](docs/demo.gif)
 
