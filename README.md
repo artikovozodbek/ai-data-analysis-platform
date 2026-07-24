@@ -2,6 +2,8 @@
 
 AI Data Analysis Platform is a modular data analysis system built with Python and FastAPI. It provides dataset uploading, dataset understanding, AI chat, data cleaning guidance, statistical analysis, visualization recommendations, report generation, and a simple UI.
 
+![Demo](docs/demo.gif)
+
 ## Features
 
 - Dataset upload and preview for CSV, Excel, JSON, TXT, TSV, Parquet
